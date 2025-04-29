@@ -38,22 +38,29 @@ export function ChatInterface() {
       // Filter out welcome message and prepare message history
       const messageHistory = messages
         .filter(msg => !msg.isWelcomeMessage)
-        .filter(msg => msg.text && msg.text.trim() !== "");
-        
-      const aiResponse = await getAIResponse([
-        ...messageHistory,
-        { ...message, text: input.trim() }
-      ]);
-      
-      if (aiResponse && typeof aiResponse === 'string') {
-        setMessages(prev => prev.map(msg => 
-          msg === newMessage ? { ...msg, isTyping: false, text: aiResponse } : msg
-        ));
-      } else {
-        throw new Error('Invalid response from AI');
+        .filter(msg => msg.text && msg.text.trim() !== "")
+        .map(msg => ({
+          role: msg.sender === 'user' ? 'user' : 'assistant',
+          content: msg.text
+        }));
+
+      // Add the current user input as a user message
+      if (input.trim()) {
+        messageHistory.push({
+          role: 'user',
+          content: input.trim()
+        });
       }
+        
+      const aiResponse = await getAIResponse(messageHistory);
+      
+      // Update the message with the AI response
+      setMessages(prev => prev.map(msg => 
+        msg === newMessage ? { ...msg, isTyping: false, text: aiResponse } : msg
+      ));
     } catch (error) {
       console.error("Error getting response:", error);
+      // Update the message with an error message
       setMessages(prev => prev.map(msg => 
         msg === newMessage ? { 
           ...msg, 

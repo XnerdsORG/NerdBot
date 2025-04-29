@@ -27,29 +27,43 @@ Remember to maintain a consistent narrative based on this information.`;
 
 export async function getAIResponse(messages) {
   try {
-    // Convert the messages array into a format Claude can understand
-    const messageHistory = messages.map(msg => ({
-      role: msg.sender === 'user' ? 'user' : 'assistant',
-      content: msg.text
-    }));
+    // Ensure we have at least one user message
+    if (!messages.some(msg => msg.role === 'user')) {
+      throw new Error('No user message found in conversation history');
+    }
 
     // Send the request to Claude
     const response = await anthropic.messages.create({
       model: "claude-3-opus-20240229",
       max_tokens: 1000,
       temperature: 0.7,
-      messages: messageHistory,
+      messages: messages,
       system: createSystemPrompt()
     });
 
-    // Access the response content correctly
-    if (response && response.content && response.content[0] && response.content[0].text) {
-      return response.content[0].text;
+    // Check if we got a valid response
+    if (!response || !response.content) {
+      throw new Error('No response content received from API');
     }
+
+    // Handle empty content array
+    if (Array.isArray(response.content) && response.content.length === 0) {
+      return "I apologize, but I couldn't generate a response. Please try rephrasing your question or ask something else.";
+    }
+
+    // Extract the text content from the response
+    const textContent = response.content
+      .filter(item => item.type === 'text')
+      .map(item => item.text)
+      .join('\n');
     
-    throw new Error('Unexpected response format from API');
+    if (!textContent) {
+      throw new Error('No text content found in response');
+    }
+
+    return textContent;
   } catch (error) {
     console.error("Error getting AI response:", error);
-    return "I apologize, but I'm having trouble processing your request right now.";
+    throw error; // Propagate the error to be handled by the UI
   }
 } 
