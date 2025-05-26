@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Send, Bot, User, Sparkles } from "lucide-react";
 import { getAIResponse } from "../lib/langchain";
 
 export function ChatInterface() {
@@ -14,8 +15,8 @@ export function ChatInterface() {
       text: "Welcome to Xnerds. How can I help you today?",
       sender: "bot",
       isTyping: false,
-      isWelcomeMessage: true
-    }
+      isWelcomeMessage: true,
+    },
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -31,43 +32,47 @@ export function ChatInterface() {
 
   const simulateTyping = async (message) => {
     const newMessage = { ...message, isTyping: true };
-    setMessages(prev => [...prev, newMessage]);
-    
+    setMessages((prev) => [...prev, newMessage]);
+
     try {
       setIsLoading(true);
-      // Filter out welcome message and prepare message history
       const messageHistory = messages
-        .filter(msg => !msg.isWelcomeMessage)
-        .filter(msg => msg.text && msg.text.trim() !== "")
-        .map(msg => ({
-          role: msg.sender === 'user' ? 'user' : 'assistant',
-          content: msg.text
+        .filter((msg) => !msg.isWelcomeMessage)
+        .filter((msg) => msg.text && msg.text.trim() !== "")
+        .map((msg) => ({
+          role: msg.sender === "user" ? "user" : "assistant",
+          content: msg.text,
         }));
 
-      // Add the current user input as a user message
       if (input.trim()) {
         messageHistory.push({
-          role: 'user',
-          content: input.trim()
+          role: "user",
+          content: input.trim(),
         });
       }
-        
+
       const aiResponse = await getAIResponse(messageHistory);
-      
-      // Update the message with the AI response
-      setMessages(prev => prev.map(msg => 
-        msg === newMessage ? { ...msg, isTyping: false, text: aiResponse } : msg
-      ));
+
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg === newMessage
+            ? { ...msg, isTyping: false, text: aiResponse }
+            : msg
+        )
+      );
     } catch (error) {
       console.error("Error getting response:", error);
-      // Update the message with an error message
-      setMessages(prev => prev.map(msg => 
-        msg === newMessage ? { 
-          ...msg, 
-          isTyping: false, 
-          text: "I apologize, but I encountered an error. Please try again." 
-        } : msg
-      ));
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg === newMessage
+            ? {
+                ...msg,
+                isTyping: false,
+                text: "I apologize, but I encountered an error. Please try again.",
+              }
+            : msg
+        )
+      );
     } finally {
       setIsLoading(false);
     }
@@ -77,23 +82,23 @@ export function ChatInterface() {
     e.preventDefault();
     if (input.trim() && !isLoading) {
       const userMessage = { text: input, sender: "user", isTyping: false };
-      setMessages(prev => [...prev, userMessage]);
+      setMessages((prev) => [...prev, userMessage]);
       setInput("");
-      
+
       const botResponse = {
         text: "",
         sender: "bot",
-        isTyping: true
+        isTyping: true,
       };
       await simulateTyping(botResponse);
     }
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-12rem)] w-full max-w-6xl mx-auto">
-      <Card className="flex flex-col h-full bg-black/90 border-blue-500/20">
-        <ScrollArea className="flex-1 p-4">
-          <div className="space-y-4">
+    <div className="flex flex-col h-[calc(100vh-16rem)] w-full max-w-6xl mx-auto">
+      <Card className="flex flex-col h-full bg-slate-900/80 backdrop-blur-xl border-slate-700/50 shadow-2xl">
+        <ScrollArea className="flex-1 p-6">
+          <div className="space-y-6">
             {messages.map((message, index) => (
               <div
                 key={index}
@@ -102,44 +107,87 @@ export function ChatInterface() {
                 }`}
               >
                 <div
-                  className={`flex items-start gap-2.5 ${
+                  className={`flex items-start gap-4 max-w-[80%] ${
                     message.sender === "user" ? "flex-row-reverse" : "flex-row"
                   }`}
                 >
-                  <Avatar>
-                    <AvatarImage
-                      src={
+                  <Avatar className="w-10 h-10 border-2 border-slate-600/50">
+                    <AvatarFallback
+                      className={`${
                         message.sender === "user"
-                          ? "https://github.com/shadcn.png"
-                          : "https://github.com/vercel.png"
-                      }
-                      alt="avatar"
-                    />
-                    <AvatarFallback>
-                      {message.sender === "user" ? "U" : "B"}
+                          ? "bg-gradient-to-br from-blue-500 to-purple-600"
+                          : "bg-gradient-to-br from-cyan-500 to-purple-600"
+                      } text-white`}
+                    >
+                      {message.sender === "user" ? (
+                        <User className="w-5 h-5" />
+                      ) : (
+                        <Bot className="w-5 h-5" />
+                      )}
                     </AvatarFallback>
                   </Avatar>
+
                   <div
-                    className={`flex flex-col gap-1 ${
+                    className={`flex flex-col gap-2 ${
                       message.sender === "user" ? "items-end" : "items-start"
                     }`}
                   >
+                    <div className="flex items-center gap-2 text-xs text-slate-400">
+                      {message.sender === "user" ? "You" : "Nerd Bot"}
+                      {message.sender === "bot" && (
+                        <Sparkles className="w-3 h-3" />
+                      )}
+                    </div>
+
                     <div
-                      className={`flex flex-col w-full max-w-[640px] leading-1.5 p-4 ${
+                      className={`relative p-4 rounded-2xl ${
                         message.sender === "user"
-                          ? "bg-blue-900 text-white rounded-l-xl rounded-tr-xl"
-                          : "bg-gray-800 text-white rounded-r-xl rounded-tl-xl"
+                          ? "bg-gradient-to-br from-blue-600 to-purple-600 text-white shadow-lg"
+                          : "bg-slate-800/80 text-slate-100 border border-slate-700/50 shadow-lg"
                       }`}
                     >
                       {message.isTyping ? (
-                        <div className="flex space-x-1">
-                          <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                          <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                          <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                        <div className="flex items-center space-x-2">
+                          <div className="flex space-x-1">
+                            <div
+                              className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce"
+                              style={{ animationDelay: "0ms" }}
+                            ></div>
+                            <div
+                              className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce"
+                              style={{ animationDelay: "150ms" }}
+                            ></div>
+                            <div
+                              className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce"
+                              style={{ animationDelay: "300ms" }}
+                            ></div>
+                          </div>
+                          <span className="text-xs text-slate-400 ml-2">
+                            Thinking...
+                          </span>
                         </div>
                       ) : (
-                        <p className="text-sm font-normal font-mono">{message.text}</p>
+                        <p className="text-sm leading-relaxed">
+                          {message.text}
+                        </p>
                       )}
+
+                      {/* Message tail */}
+                      <div
+                        className={`absolute top-4 ${
+                          message.sender === "user"
+                            ? "right-0 translate-x-1/2"
+                            : "left-0 -translate-x-1/2"
+                        }`}
+                      >
+                        <div
+                          className={`w-3 h-3 rotate-45 ${
+                            message.sender === "user"
+                              ? "bg-gradient-to-br from-blue-600 to-purple-600"
+                              : "bg-slate-800/80 border-l border-t border-slate-700/50"
+                          }`}
+                        ></div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -148,25 +196,41 @@ export function ChatInterface() {
             <div ref={messagesEndRef} />
           </div>
         </ScrollArea>
-        <form onSubmit={handleSendMessage} className="p-4 border-t border-blue-500/20">
-          <div className="flex gap-2">
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Type your message..."
-              className="flex-1 bg-gray-800 text-white border-blue-500/20 focus:border-blue-500 font-mono"
-              disabled={isLoading}
-            />
-            <Button 
+
+        <div className="p-6 border-t border-slate-700/50 bg-slate-800/50">
+          <form onSubmit={handleSendMessage} className="flex gap-3">
+            <div className="relative flex-1">
+              <Input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Type your message..."
+                className="bg-slate-800/80 border-slate-600/50 text-slate-100 placeholder:text-slate-400 focus:border-cyan-500 focus:ring-cyan-500/20 pr-12 h-12 rounded-xl"
+                disabled={isLoading}
+              />
+              {input.trim() && (
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
+                </div>
+              )}
+            </div>
+            <Button
               type="submit"
-              className="bg-blue-900 hover:bg-blue-800 text-white font-mono"
-              disabled={isLoading}
+              className="bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white h-12 px-6 rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isLoading || !input.trim()}
             >
-              Send
+              {isLoading ? (
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+              ) : (
+                <Send className="w-5 h-5" />
+              )}
             </Button>
+          </form>
+
+          <div className="flex items-center justify-center mt-4 text-xs text-slate-500">
+            <span>Powered by advanced AI • Secure & Private</span>
           </div>
-        </form>
+        </div>
       </Card>
     </div>
   );
-} 
+}
