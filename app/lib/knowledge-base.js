@@ -57,7 +57,8 @@ export const companyKnowledge = {
     {
       "question": "Do you offer custom solutions?",
       "answer": "Yes, we specialize in creating custom solutions tailored to our clients' specific requirements and business goals."
-    },
+    }
+  ],
   "projects": [
     {
       "name": "ACTFlow",
