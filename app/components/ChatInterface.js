@@ -227,7 +227,7 @@ export function ChatInterface() {
           </form>
 
           <div className="flex items-center justify-center mt-4 text-xs text-slate-500">
-            <span>Powered by advanced AI • Secure & Private</span>
+            <span>Powered by Xnerds Solutions • Secure & Private</span>
           </div>
         </div>
       </Card>

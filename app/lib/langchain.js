@@ -1,8 +1,9 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { companyKnowledge } from './knowledge-base';
+const apiKey = process.env.ANTHROPIC_API_KEY;
 
 const anthropic = new Anthropic({
-  apiKey: "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",
+  apiKey: apiKey,
   dangerouslyAllowBrowser: true  // Enable browser usage
 });
 
