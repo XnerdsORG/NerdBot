@@ -44,7 +44,7 @@ yarn install
 
 3. Create a `.env.local` file in the root directory and add your Anthropic API key:
 ```env
-ANTHROPIC_API_KEY=your_api_key_here
+NEXT_PUBLIC_ANTHROPIC_API_KEY=your_api_key_here
 ```
 
 4. Start the development server:

@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { companyKnowledge } from './knowledge-base';
-const apiKey = process.env.ANTHROPIC_API_KEY;
+const apiKey = process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY;
 
 const anthropic = new Anthropic({
   apiKey: apiKey,
